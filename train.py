@@ -21,7 +21,7 @@ tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability (defau
 tf.flags.DEFINE_float("l2_reg_lambda", 0.0, "L2 regularization lambda (default: 0.0)")
 
 # training parameters
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
+tf.flags.DEFINE_integer("batch_size", 32, "Batch Size (default: 32)")
 tf.flags.DEFINE_integer("num_epochs", 2000, "Number of training epochs (default: 2000)")
 tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
 tf.flags.DEFINE_integer("checkpoint_every", 5, "Save model after this many steps (default: 5)")
@@ -52,6 +52,7 @@ def pre_process():
     max_document_length = max([len(x.split(' ')) for x in x_text])
     tokenizer = Tokenizer(num_words=None)
     tokenizer.fit_on_texts(x_text)
+    # text to sequence
     sequences = tokenizer.texts_to_sequences(x_text)
     x = S.pad_sequences(sequences, maxlen=max_document_length, padding='post')
 
@@ -83,7 +84,7 @@ def train(x_train, y_train, tokenizer, x_dev, y_dev):
             cnn = TextCNN(
                 sequence_length=x_train.shape[1],
                 num_classes=y_train.shape[1],
-                vocab_size=len(tokenizer.word_index),
+                vocab_size=len(tokenizer.word_index)+1,
                 embedding_size=FLAGS.embedding_dim,
                 filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))),
                 num_filters=FLAGS.num_filters,
